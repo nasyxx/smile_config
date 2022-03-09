@@ -44,7 +44,7 @@ import_heading_tf = "Tensorflow"
 known_torch = ["torch"]
 import_heading_torch = "Torch"
 
-known_types = ["typing", "types"]
+known_types = ["typing", "types", "typing_extensions"]
 import_heading_types = "Types"
 
 known_config = ["config", "settings", "cfg"]

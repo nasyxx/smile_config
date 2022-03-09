@@ -1,0 +1,59 @@
+[project]
+name = "smile-config"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Nasy", email = "nasyxx+git@gmail.com"},
+]
+dependencies = [
+    "tomlkit>=0.9.0",
+]
+requires-python = ">=3.9"
+license = {text = "MIT"}
+
+[project.urls]
+homepage = ""
+
+[tool]
+[tool.pdm]
+
+[build-system]
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[tool.isort]
+py_version = 39
+
+profile = "black"
+group_by_package = true
+color_output = true
+combine_straight_imports = true
+
+
+import_heading_stdlib = "Standard Library"
+
+
+known_db = ["lucene", "lupyne", "elasticsearch", "sqlite", "shelve"]
+import_heading_db = "Database"
+
+known_tf = ["tensorflow"]
+import_heading_tf = "Tensorflow"
+
+known_torch = ["torch"]
+import_heading_torch = "Torch"
+
+known_types = ["typing", "types"]
+import_heading_types = "Types"
+
+known_config = ["config", "settings", "cfg"]
+import_heading_config = "Config"
+
+known_math = ["numpy", "scipy", "sklearn", "pandas"]
+import_heading_math = "Math"
+
+import_heading_thirdparty = "Others"
+
+import_heading_localfolder = "Local"
+
+sections = ["FUTURE", "FIRSTPARTY", "STDLIB", "DB", "MATH", "TF", "TORCH", "CONFIG", "TYPES", "THIRDPARTY", "LOCALFOLDER"]
+

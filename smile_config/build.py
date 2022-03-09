@@ -85,7 +85,7 @@ def _build_options(
     dc: DC, ns: Optional[dict[str, Any]] = None
 ) -> Generator[Union[SConfig, Option], None, None]:
     for x in dc.__dataclass_fields__:
-        if is_dataclass(x):
+        if is_dataclass(getattr(dc, x)):
             yield _build_sconfig(x, dc, ns)
         else:
             yield _build_option(x, dc, ns)

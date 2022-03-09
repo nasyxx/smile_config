@@ -36,20 +36,22 @@ license  : GPL-3.0+
 smile config utils
 """
 # Standard Library
+import json
+from collections import defaultdict
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from collections import defaultdict
-import json
 
 # Types
-from typing import Mapping, Union, Any
+from typing import Any, Callable, Generator, Iterable, Mapping, Optional, TypeVar, Union
 
 # Others
-from tomlkit import TOMLDocument, dump, parse, dumps
+from tomlkit import TOMLDocument, dump, dumps, parse
 
-
+A = TypeVar("A")
+B = TypeVar("B")
 DD = defaultdict[str, Any]
+
 
 def load_config(path: Union[str, PathLike[str]]) -> TOMLDocument:
     """Load config file."""
@@ -90,3 +92,12 @@ def config_dict(d: dict, nested: bool = True) -> DD:
     for k, v in d.items():
         _config_insert(r, k, v, nested)
     return r
+
+
+def scanl(
+    func: Callable[[B, A], B], xs: Iterable[A], init: B
+) -> Generator[B, None, None]:
+    """Simular to foldl but keep result."""
+    for x in xs:
+        init = func(init, x)
+        yield init

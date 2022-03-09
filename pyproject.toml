@@ -1,6 +1,5 @@
 [project]
 name = "smile-config"
-version = "0.1.0"
 description = ""
 authors = [
     {name = "Nasy", email = "nasyxx+git@gmail.com"},
@@ -10,12 +9,15 @@ dependencies = [
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}
+dynamic = ["version"]
 
 [project.urls]
-homepage = ""
+homepage = "https://github.com/nasyxx/smile_config"
 
 [tool]
 [tool.pdm]
+includes = ["smile_config"]
+version = {from = "smile_config/__init__.py"}
 
 [build-system]
 requires = ["pdm-pep517"]

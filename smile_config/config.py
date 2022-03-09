@@ -33,20 +33,77 @@ filename : config.py
 project  : smile_config
 license  : GPL-3.0+
 
-Config.py
+Conifg.py
 """
-
 from __future__ import annotations
 
 # Standard Library
-import json
 from argparse import ArgumentParser, _ArgumentGroup  # noqa: WPS450
 
 # Types
-from typing import Any, Optional, Union
+from typing import Any, Generator, MutableMapping, Optional, Union
 
 # Local
-from .utils import add_prefix, config_dict
+from .utils import add_prefix
+
+
+class ConfigDict(MutableMapping):
+    """Config dictionary."""
+
+    def __init__(self, d: MutableMapping[str, Any]) -> None:
+        """Initialize."""
+        self.data = {}  # type: dict[str, Any]
+        for k, v in d.items():
+            self[k] = v
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Get VALUE from KEY."""
+        try:
+            return self.__getitem__(key)
+        except KeyError:
+            return default
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Set VALUE to data with KEY."""
+        keys = key.split(".")
+        d = self.data
+        for subkey in keys[:-1]:
+            d = d.setdefault(subkey, {})
+        d[keys[-1]] = value
+
+    def __getitem__(self, key: str) -> Any:
+        """Get VALUE from KEY."""
+        keys = key.split(".")
+        r = self.data
+        for subkey in keys:
+            r = r[subkey]
+        return r
+
+    def __getattr__(self, name: str) -> Any:
+        """Get attr VALUE from NAME."""
+        try:
+            res = self[name]
+        except KeyError:
+            res = object.__getattribute__(self, name)
+        if isinstance(res, dict):
+            return ConfigDict(res)
+        return res
+
+    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
+        """Generate config items."""
+        yield from self.data.items()
+
+    def __len__(self) -> int:
+        """Get length of config items."""
+        return len(self.data)
+
+    def __delitem__(self, __v: Any) -> None:
+        """Del config item."""
+        return self.data.__delitem__(__v)
+
+    def __repr__(self) -> str:
+        """Repr config item."""
+        return repr(self.data)
 
 
 class Option:
@@ -72,7 +129,7 @@ class Config:
         else:
             self.help = help_
         self.options = options
-        self.config = vars(self.build().parse_args())
+        self.config = ConfigDict(vars(self.build().parse_args()))
 
     def build(self):
         """Post initialize."""
@@ -86,13 +143,13 @@ class Config:
     def __getattr__(self, name: str) -> Any:
         """Get attr from config."""
         try:
-            return config_dict(self.config)[name]
+            return getattr(self.config, name)
         except AttributeError:
             return object.__getattribute__(self, name)  # noqa: WPS609
 
     def __repr__(self) -> str:
         """Repr str."""
-        return str(json.loads(json.dumps(config_dict(self.config, nested=False))))
+        return str(self.config)
 
 
 class SConfig(Config):

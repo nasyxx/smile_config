@@ -38,13 +38,12 @@ build
 from __future__ import annotations
 
 # Standard Library
-from dataclasses import _MISSING_TYPE, Field, asdict, dataclass, is_dataclass
+from argparse import ArgumentDefaultsHelpFormatter
+from dataclasses import is_dataclass
 
 # Types
-from typing import Any, Generator, Optional, Type, TypeVar, Union, get_type_hints
-
-# Others
-from typing_extensions import Protocol
+from typing import Any, Generator, Optional, TypeVar, Union, get_type_hints
+from typing_extensions import Protocol, _AnnotatedAlias  # noqa: WPS450
 
 # Local
 from .config import Config, Option, SConfig
@@ -64,15 +63,21 @@ def from_dataclass(config: DC, ns: Optional[dict[str, Any]] = None) -> Config:
     if not is_dataclass(config):
         raise TypeError("config must be a dataclass.")
     return Config(
-        config.__doc__ or type(config).__name__,
+        Option(
+            description=config.__doc__ or type(config).__name__,
+            formatter_class=ArgumentDefaultsHelpFormatter,
+        ),
         *_build_options(config, ns),
     )
 
 
 def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option:
-    return Option(
-        f"--{x}", default=getattr(dc, x), type=get_type_hints(dc, globalns=ns)[x]
-    )
+    typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
+    helps = "-"
+    if isinstance(typ, _AnnotatedAlias):
+        helps = typ.__metadata__[0]
+        typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
+    return Option(f"--{x}", default=getattr(dc, x), type=typ, help=helps)
 
 
 def _build_sconfig(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> SConfig:

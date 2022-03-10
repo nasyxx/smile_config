@@ -41,7 +41,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 # Types
-from typing import Union
+from typing import Annotated, Union
 
 # Local
 from .build import from_dataclass
@@ -78,7 +78,7 @@ class Train:
 
 @dataclass
 class ML:
-    lr: float = 0.001
+    lr: Annotated[float, "learning rate"] = 0.001
     train: Train = Train()
 
 

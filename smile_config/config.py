@@ -47,12 +47,22 @@ from typing import Any, Generator, MutableMapping, Optional, Union
 from .utils import add_prefix
 
 
+def _iter_config(
+    d: dict[str, Any], prefix: str = ""
+) -> Generator[tuple[str, Any], None, None]:
+    for k, v in d.items():
+        if isinstance(v, dict):
+            yield from _iter_config(v, prefix=f"{prefix}{k}.")
+        else:
+            yield f"{prefix}{k}", v
+
+
 class ConfigDict(MutableMapping):
     """Config dictionary."""
 
     def __init__(self, d: MutableMapping[str, Any]) -> None:
         """Initialize."""
-        self.data = {}  # type: dict[str, Any]
+        self.__data = {}  # type: dict[str, Any]
         for k, v in d.items():
             self[k] = v
 
@@ -66,7 +76,7 @@ class ConfigDict(MutableMapping):
     def __setitem__(self, key: str, value: Any) -> None:
         """Set VALUE to data with KEY."""
         keys = key.split(".")
-        d = self.data
+        d = self.__data
         for subkey in keys[:-1]:
             d = d.setdefault(subkey, {})
         d[keys[-1]] = value
@@ -74,7 +84,7 @@ class ConfigDict(MutableMapping):
     def __getitem__(self, key: str) -> Any:
         """Get VALUE from KEY."""
         keys = key.split(".")
-        r = self.data
+        r = self.__data
         for subkey in keys:
             r = r[subkey]
         return r
@@ -91,19 +101,27 @@ class ConfigDict(MutableMapping):
 
     def __iter__(self) -> Generator[tuple[str, Any], None, None]:
         """Generate config items."""
-        yield from self.data.items()
+        yield from self.__data.items()
+
+    def deep_iter(self) -> Generator[tuple[str, Any], None, None]:
+        """Deep iter config."""
+        yield from _iter_config(self.__data)
 
     def __len__(self) -> int:
         """Get length of config items."""
-        return len(self.data)
+        return len(self.__data)
 
     def __delitem__(self, __v: Any) -> None:
         """Del config item."""
-        return self.data.__delitem__(__v)
+        return self.__data.__delitem__(__v)
 
     def __repr__(self) -> str:
         """Repr config item."""
-        return repr(self.data)
+        return repr(self.__data)
+
+    def __dir__(self) -> list[str]:
+        """Dir self."""
+        return list(map(lambda x: x[0], self.deep_iter()))
 
 
 class Option:
@@ -150,6 +168,10 @@ class Config:
     def __repr__(self) -> str:
         """Repr str."""
         return str(self.config)
+
+    def __dir__(self) -> list[str]:
+        """Dir self."""
+        return dir(self.config)
 
 
 class SConfig(Config):

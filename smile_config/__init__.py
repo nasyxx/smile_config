@@ -1,4 +1,4 @@
 # Local
 from .api import Config, ConfigDict, Option, SConfig, from_dataclass
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"

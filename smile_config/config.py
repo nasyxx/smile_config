@@ -99,6 +99,12 @@ class ConfigDict(MutableMapping):
             return ConfigDict(res)
         return res
 
+    def __setstate__(self, state: dict):
+        """Restore state."""
+        data = state.pop("_ConfigDict__data")
+        self.__dict__.update(state)
+        self.__data = data
+
     def __iter__(self) -> Generator[tuple[str, Any], None, None]:
         """Generate config items."""
         yield from self.__data.items()
@@ -173,6 +179,8 @@ class Config:
 
     def __getattr__(self, name: str) -> Any:
         """Get attr from config."""
+        if name == "config":
+            return super().__getattribute__(name)  # noqa: WPS613
         if name in self.config.keys():
             return getattr(self.config, name)
         return super().__getattribute__(name)  # noqa: WPS613

@@ -132,6 +132,19 @@ class Option:
         self.args = args
         self.kwds = kwds
 
+    def __repr__(self) -> str:
+        """Repr options."""
+        args = ", ".join(self.args)
+        kwds = ", ".join(
+            map(
+                lambda x: "=".join(
+                    map(lambda s: "'" in str(s) and str(s) or repr(s), x)
+                ),
+                self.kwds.items(),
+            )
+        )
+        return f"Option({args and f'{args}, *, ' or ''}{kwds}"
+
 
 class Config:
     """Smile config."""
@@ -160,14 +173,15 @@ class Config:
 
     def __getattr__(self, name: str) -> Any:
         """Get attr from config."""
-        try:
+        if name in dict(self.config.deep_iter()):
             return getattr(self.config, name)
-        except AttributeError:
-            return object.__getattribute__(self, name)  # noqa: WPS609
+        return super().__getattribute__(name)  # noqa: WPS613
 
     def __repr__(self) -> str:
         """Repr str."""
-        return str(self.config)
+        if "config" in self.__dict__:
+            return str(self.config)
+        return str(vars(self))
 
     def __dir__(self) -> list[str]:
         """Dir self."""

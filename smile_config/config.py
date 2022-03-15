@@ -173,7 +173,7 @@ class Config:
 
     def __getattr__(self, name: str) -> Any:
         """Get attr from config."""
-        if name in dict(self.config.deep_iter()):
+        if name in self.config.keys():
             return getattr(self.config, name)
         return super().__getattribute__(name)  # noqa: WPS613
 

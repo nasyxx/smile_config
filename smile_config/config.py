@@ -39,12 +39,13 @@ from __future__ import annotations
 
 # Standard Library
 from argparse import ArgumentParser, _ArgumentGroup  # noqa: WPS450
+from dataclasses import asdict
 
 # Types
-from typing import Any, Generator, MutableMapping, Optional, Union
+from typing import Any, Generator, MutableMapping, Optional, Type, Union
 
 # Local
-from .utils import add_prefix
+from .utils import DC, add_prefix, from_dict
 
 
 def _iter_config(
@@ -159,6 +160,7 @@ class Config:
         self,
         help_: Union[Option, str] = "Smile Config help info.",
         *options: Union[Option, SConfig],
+        dcls: Optional[Type[DC]] = None,
     ) -> None:
         """Initialize."""
         if isinstance(help_, str):
@@ -166,7 +168,11 @@ class Config:
         else:
             self.help = help_
         self.options = options
-        self.config = ConfigDict(vars(self.build().parse_args()))
+        config = vars(self.build().parse_args())
+        if dcls is not None:
+            self.config = from_dict(dcls, config)
+        else:
+            self.config = ConfigDict(config)
 
     def build(self):
         """Post initialize."""
@@ -181,7 +187,7 @@ class Config:
         """Get attr from config."""
         if name == "config":
             return super().__getattribute__(name)  # noqa: WPS613
-        if name in self.config.keys():
+        if name in asdict(self.config).keys():
             return getattr(self.config, name)
         return super().__getattribute__(name)  # noqa: WPS613
 

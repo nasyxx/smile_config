@@ -36,14 +36,14 @@ license  : GPL-3.0+
 smile config utils
 """
 # Standard Library
-import json
+import inspect
 from collections import defaultdict
 from itertools import chain
 from os import PathLike
-from pathlib import Path
 
 # Types
-from typing import Any, Callable, Generator, Iterable, Mapping, Optional, TypeVar, Union
+from typing import Any, Callable, Generator, Iterable, Mapping, Type, TypeVar, Union
+from typing_extensions import Protocol
 
 # Others
 from tomlkit import TOMLDocument, dump, dumps, parse
@@ -51,6 +51,12 @@ from tomlkit import TOMLDocument, dump, dumps, parse
 A = TypeVar("A")
 B = TypeVar("B")
 DD = defaultdict[str, Any]
+
+
+class DC(Protocol):
+    """Dataclass typing."""
+
+    __dataclass_fields__: dict
 
 
 def load_config(path: Union[str, PathLike[str]]) -> TOMLDocument:
@@ -101,3 +107,19 @@ def scanl(
     for x in xs:
         init = func(init, x)
         yield init
+
+
+def from_dict(cls: Type[A], data: dict[str, Any]) -> A:
+    """From dict to dataclass."""
+    return cls(
+        **dict(
+            map(
+                lambda kv: (
+                    lambda k, v: v.default == v.empty
+                    and (k, data[k])
+                    or (k, data.get(k, v.default))
+                )(kv[0], kv[1]),
+                inspect.signature(cls).parameters.items(),
+            )
+        )
+    )

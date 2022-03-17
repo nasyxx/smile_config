@@ -43,19 +43,14 @@ from dataclasses import is_dataclass
 
 # Types
 from typing import Any, Generator, Optional, TypeVar, Union, get_type_hints
-from typing_extensions import Protocol, _AnnotatedAlias  # noqa: WPS450
+from typing_extensions import _AnnotatedAlias  # noqa: WPS450
 
 # Local
 from .config import Config, Option, SConfig
+from .utils import DC
 
 A = TypeVar("A")
 B = TypeVar("B")
-
-
-class DC(Protocol):
-    """Dataclass protocol."""
-
-    __dataclass_fields__: dict
 
 
 def from_dataclass(config: DC, ns: Optional[dict[str, Any]] = None) -> Config:
@@ -68,6 +63,7 @@ def from_dataclass(config: DC, ns: Optional[dict[str, Any]] = None) -> Config:
             formatter_class=ArgumentDefaultsHelpFormatter,
         ),
         *_build_options(config, ns),
+        dcls=config.__class__,
     )
 
 

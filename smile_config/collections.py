@@ -84,4 +84,4 @@ class ML:
 
 if __name__ == "__main__":
     ml = from_dataclass(ML(), globals())
-    assert ml.config == ML()
+    print(ml.config)

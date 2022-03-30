@@ -111,13 +111,24 @@ def scanl(
 
 def from_dict(cls: Type[A], data: dict[str, Any]) -> A:
     """From dict to dataclass."""
+    d: dict[str, Any] = {}
+    for key, value in data.items():
+        dt = d
+        levels = key.split(".")
+        for level in levels[:-1]:
+            dt = dt.setdefault(level, {})
+        dt[levels[-1]] = value
+
     return cls(
         **dict(
             map(
                 lambda kv: (
-                    lambda k, v: v.default == v.empty
-                    and (k, data[k])
-                    or (k, data.get(k, v.default))
+                    lambda k, v: (k in d)
+                    and (
+                        isinstance(d[k], dict)
+                        and (k, from_dict(v.default.__class__, d[k]))
+                    )
+                    or (k, d.get(k, v.default))
                 )(kv[0], kv[1]),
                 inspect.signature(cls).parameters.items(),
             )

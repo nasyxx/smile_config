@@ -38,10 +38,10 @@ Smile config collections.
 from __future__ import annotations
 
 # Standard Library
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 # Types
-from typing import Annotated, Union
+from typing import Annotated, Optional, Union
 
 # Local
 from .build import from_dataclass
@@ -80,6 +80,7 @@ class Train:
 class ML:
     lr: Annotated[float, "learning rate"] = 0.001
     train: Train = Train()
+    cc: list[int] = field(default_factory=list)
 
 
 if __name__ == "__main__":

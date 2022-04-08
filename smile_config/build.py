@@ -38,8 +38,10 @@ build
 from __future__ import annotations
 
 # Standard Library
+import re
 from argparse import ArgumentDefaultsHelpFormatter
 from dataclasses import is_dataclass
+from pydoc import locate
 
 # Types
 from typing import Any, Generator, Optional, TypeVar, Union, get_type_hints
@@ -48,6 +50,8 @@ from typing_extensions import _AnnotatedAlias  # noqa: WPS450
 # Local
 from .config import Config, Option, SConfig
 from .utils import DC
+
+TRE = re.compile(r"^.*?\[(.*)\]$")
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -70,10 +74,19 @@ def from_dataclass(config: DC, ns: Optional[dict[str, Any]] = None) -> Config:
 def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option:
     typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
     helps = "-"
+    kwds = {}
     if isinstance(typ, _AnnotatedAlias):
         helps = typ.__metadata__[0]
         typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
-    return Option(f"--{x}", default=getattr(dc, x), type=typ, help=helps)
+    styp = str(typ)
+    if "Optional" in styp:
+        styp = TRE.findall(styp)[0]
+    if styp.startswith("list") or styp.startswith("List"):
+        tt = TRE.findall(styp)
+        typ = tt and locate(tt[0]) or str
+        kwds["nargs"] = "+"
+        kwds["action"] = "extend"
+    return Option(f"--{x}", default=getattr(dc, x), type=typ, help=helps, **kwds)
 
 
 def _build_sconfig(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> SConfig:

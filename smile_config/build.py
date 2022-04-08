@@ -75,9 +75,17 @@ def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option
     typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
     helps = "-"
     kwds = {}
+    args: list[Any] = []
     if isinstance(typ, _AnnotatedAlias):
-        helps = typ.__metadata__[0]
+        metas = typ.__metadata__[0]
         typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
+        if isinstance(metas, str):
+            helps = metas
+        if isinstance(metas, list):
+            args = metas
+        if isinstance(metas, dict):
+            kwds = metas
+
     styp = str(typ)
     if "Optional" in styp:
         styp = TRE.findall(styp)[0]
@@ -85,8 +93,12 @@ def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option
         tt = TRE.findall(styp)
         typ = tt and locate(tt[0]) or str
         kwds["nargs"] = "+"
-        kwds["action"] = "extend"
-    return Option(f"--{x}", default=getattr(dc, x), type=typ, help=helps, **kwds)
+
+    kwds.setdefault("default", getattr(dc, x))
+    kwds.setdefault("type", typ)
+    kwds.setdefault("help", helps)
+
+    return Option(f"--{x}", *args, **kwds)
 
 
 def _build_sconfig(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> SConfig:

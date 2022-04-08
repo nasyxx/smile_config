@@ -78,9 +78,9 @@ class Train:
 
 @dataclass
 class ML:
-    lr: Annotated[float, "learning rate"] = 0.001
+    lr: Annotated[float, dict(help="learning rate", type=int)] = 0.001
     train: Train = Train()
-    cc: list[int] = field(default_factory=list)
+    cc: list[int] = field(default_factory=lambda: [10])
 
 
 if __name__ == "__main__":

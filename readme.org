@@ -1,0 +1,177 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline
+#+options: author:t broken-links:mark c:nil creator:nil
+#+options: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
+#+options: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+options: timestamp:t title:t toc:t todo:t |:t
+#+title: SMILE Config
+#+date: <2022-12-13 Tue>
+#+author: Nasy
+#+email: nasyxx@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 30.0.50 (Org mode 9.6)
+#+cite_export:
+
+Generate command line options  from dataclasses.
+
+#+begin_src python
+  # config.py
+  from dataclasses import dataclass, asdict, field
+  from smile_config import from_dataclass
+
+  @dataclass
+  class Train:
+      """Train config."""
+
+      batch_size: int = 64
+
+
+  @dataclass
+  class ML:
+      lr: Annotated[float, dict(help="learning rate", type=float)] = 0.001
+      train: Train = Train()
+      cc: list[int] = field(default_factory=lambda: [10])
+
+
+  @dataclass
+  class Example:
+      """Example config."""
+
+      ml: ML = ML()
+      x: bool = True
+      a: int | None = None
+
+
+  print(from_dataclass(Example()))
+#+end_src
+
+#+begin_src sh
+  > python config.py --ml.cc 10 10 --ml.lr 0.001 --no-x --a "1"
+  Example(ml=ML(lr=0.001, train=Train(batch_size=64), cc=[10, 10]), x=False, a=1)
+#+end_src
+
+#+begin_src sh
+  > python config.py
+  usage: collections.py [-h] [--ml.lr ML.LR] [--ml.train.batch_size ML.TRAIN.BATCH_SIZE] [--ml.cc ML.CC [ML.CC ...]] [--x | --no-x] [--a A]
+
+  Example config.
+
+  options:
+    -h, --help            show this help message and exit
+    --x, --no-x           - (default: True)
+    --a A                 - (default: None)
+
+  ml:
+    --ml.lr ML.LR         learning rate (default: 0.001)
+    --ml.cc ML.CC [ML.CC ...]
+                          - (default: [10])
+
+  ml.train:
+    --ml.train.batch_size ML.TRAIN.BATCH_SIZE
+                          - (default: 64)
+#+end_src
+
+* Install
+
+#+begin_src sh
+  pip install -U smile_config
+#+end_src
+
+* Usage
+
+** Dataclass to command line options
+
+*** Simple types
+
+Everything that argpase can handle.  ~int~, ~float~, ~str~, ~bool~, and callable object.
+
+#+begin_src python
+  @dataclass
+  class Simple:
+      a: int = 1
+      b: float = 2.0
+      c: str = "hello"
+      d: bool = False
+      e: list[int] = field(default_factory=lambda: [10])
+#+end_src
+
+Will convert to:
+
+#+begin_src python
+  parser.add_argument("--a", help="-", type=int, default=1)
+  parser.add_argument("--b", help="-", type=float, default=2.0)
+  parser.add_argument("--c", help="-", type=str, default="hello")
+  parser.add_argument("--d", help="-", type=bool, default=False, action="store_true")
+  parser.add_argument("--e", help="-", type=int, default=[10], nargs="+")
+#+end_src
+
+*** Complex types
+
+Smile config uses ~Annotation~ to handle complex types, which will pass
+the second argument to ~parser.add_argument~.
+
+#+begin_src python
+  @dataclass
+  class C:
+      x: Annotated[int, "Helps for x."] = 1
+#+end_src
+
+See the logic here:
+
+The first argument is the type, e.g. ~int~.
+
+if the second argument is ~str~, e.g. ~s~, it will be passed as ~parser.add_argument("--x", help=s, ...)~.
+
+If the second argument is a ~list~, e.g. ~args~, it will be passed as ~parser.add_argument("--x", ..., *args)~.
+
+If the second argument is a ~dict~, e.g. ~kwds~, it will be passed as ~parser.add_argument("--x", ..., **kwds)~.
+
+*** Nested dataclass
+
+Of course! It does support nested dataclass.
+
+#+begin_src python
+  @dataclass
+  class A:
+      a: int = 1
+
+  @dataclass
+  class B:
+      a: A = A()
+
+  @dataclass
+  class C:
+      a: A = A()
+      b: B = B()
+      c: int = 0
+
+
+  print(from_dataclass(C()).config)
+
+  # Output:
+  # C(a=A(a=1), b=B(a=A(a=1)), c=0)
+#+end_src
+
+** APIs
+
+Smile config provides four APIs:
+
+#+begin_src python
+  class Config:
+
+      # the dataclass dict
+      self.conf
+
+      # the dataclass
+      self.config
+
+  # Generate command line options from dataclass
+  def from_dataclass(dc: Dataclass) -> Config:...
+
+  # Convert dict to an existing dataclass
+  def from_dict(d: dict, dc: Type[Dataclass]) -> Dataclass:...
+
+  # Merge a dict with an existing dataclass instance
+  def merge_dict(dc: Dataclass, d: dict) -> Dataclass:...
+#+end_src

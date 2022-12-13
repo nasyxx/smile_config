@@ -39,10 +39,10 @@ from __future__ import annotations
 
 # Standard Library
 from argparse import ArgumentParser, _ArgumentGroup  # noqa: WPS450
-from dataclasses import asdict
+from dataclasses import asdict, is_dataclass
 
 # Types
-from typing import Any, Generator, MutableMapping, Optional, Type, Union
+from typing import Any, Generator, Iterator, MutableMapping, NoReturn, Optional, Type, Union
 
 # Local
 from .utils import DC, add_prefix, from_dict
@@ -58,7 +58,7 @@ def _iter_config(
             yield f"{prefix}{k}", v
 
 
-class ConfigDict(MutableMapping):
+class ConfigDict(MutableMapping[Any, Any]):
     """Config dictionary."""
 
     def __init__(self, d: MutableMapping[str, Any]) -> None:
@@ -100,13 +100,13 @@ class ConfigDict(MutableMapping):
             return ConfigDict(res)
         return res
 
-    def __setstate__(self, state: dict):
+    def __setstate__(self, state: dict[str, Any]) -> None:
         """Restore state."""
         data = state.pop("_ConfigDict__data")
         self.__dict__.update(state)
         self.__data = data
 
-    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
+    def __iter__(self) -> Iterator[tuple[str, Any]]:
         """Generate config items."""
         yield from self.__data.items()
 
@@ -134,7 +134,7 @@ class ConfigDict(MutableMapping):
 class Option:
     """Smile Config Arguments."""
 
-    def __init__(self, *args, **kwds) -> None:
+    def __init__(self, *args: Any, **kwds: Any) -> None:
         """Initialize."""
         self.args = args
         self.kwds = kwds
@@ -168,13 +168,14 @@ class Config:
         else:
             self.help = help_
         self.options = options
-        config = vars(self.build().parse_args())
+        self.conf = vars(self.build().parse_args())
         if dcls is not None:
-            self.config = from_dict(dcls, config)
+            self.config = from_dict(dcls, self.conf)
         else:
-            self.config = ConfigDict(config)
+            self.config = ConfigDict(self.conf)
+        self.__dict__.update(self.conf)
 
-    def build(self):
+    def build(self) -> ArgumentParser:
         """Post initialize."""
         return build_commands(
             ArgumentParser(*self.help.args, **self.help.kwds),
@@ -187,8 +188,12 @@ class Config:
         """Get attr from config."""
         if name == "config":
             return super().__getattribute__(name)  # noqa: WPS613
-        if name in asdict(self.config).keys():
-            return getattr(self.config, name)
+        if isinstance(self.config, ConfigDict):
+            if name in self.config.keys():
+                return getattr(self.config, name)
+        if is_dataclass(self.config):
+            if name in asdict(self.config).keys():
+                return getattr(self.config, name)
         return super().__getattribute__(name)  # noqa: WPS613
 
     def __repr__(self) -> str:
@@ -210,13 +215,13 @@ class SConfig(Config):
         title: Optional[str] = None,
         description: Optional[str] = None,
         *options: Union[Option, SConfig],
-    ):
+    ) -> None:
         """Initialize."""
         self.title = title
         self.desc = description
         self.options = options
 
-    def build(self):
+    def build(self) -> NoReturn:
         """Build config."""
         raise NotImplementedError()
 

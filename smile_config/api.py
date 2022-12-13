@@ -39,6 +39,14 @@ license  : GPL-3.0+
 # Local
 from .build import from_dataclass
 from .config import Config, ConfigDict, Option, SConfig
-from .utils import from_dict
+from .utils import from_dict, merge_dict
 
-__all__ = ["from_dataclass", "from_dict", "Config", "ConfigDict", "Option", "SConfig"]
+__all__ = [
+    "from_dataclass",
+    "from_dict",
+    "Config",
+    "ConfigDict",
+    "Option",
+    "SConfig",
+    "merge_dict",
+]

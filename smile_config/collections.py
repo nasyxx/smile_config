@@ -41,14 +41,14 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 # Types
-from typing import Annotated, Optional, Union
+from typing import Annotated
 
 # Local
 from .build import from_dataclass
 from .config import Config, Option, SConfig
 
 
-def ml_basic(*extra_options: Union[Option, SConfig]) -> Config:
+def ml_basic(*extra_options: Option | SConfig) -> Config:
     """Machine learning basic options."""
     return Config(
         "Smile machine learning basic options.",
@@ -83,6 +83,32 @@ class ML:
     cc: list[int] = field(default_factory=lambda: [10])
 
 
+@dataclass
+class Example:
+    """Example config."""
+
+    ml: ML = ML()
+    x: bool = True
+    a: int | None = None
+
+
+@dataclass
+class A:
+    a: int = 1
+
+
+@dataclass
+class B:
+    a: A = A()
+
+
+@dataclass
+class C:
+    a: A = A()
+    b: B = B()
+    c: int = 0
+
+
 if __name__ == "__main__":
-    ml = from_dataclass(ML(), globals())
-    print(ml.config)
+    eg = from_dataclass(Example(), globals())
+    print(eg.config)

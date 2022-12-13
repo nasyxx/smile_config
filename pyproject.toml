@@ -1,16 +1,18 @@
 [project]
 name = "smile-config"
-description = ""
+description = "Generate command line options from dataclasses."
 authors = [
     {name = "Nasy", email = "nasyxx+git@gmail.com"},
 ]
 dependencies = [
-    "tomlkit>=0.9.0",
-    "typing-extensions>=4.3.0",
+    "tomlkit",
+    "typing-extensions",
 ]
 requires-python = ">=3.9"
 license = {text = "MIT"}
 dynamic = ["version"]
+
+readme = "readme.md"
 
 [project.urls]
 homepage = "https://github.com/nasyxx/smile_config"
@@ -20,12 +22,18 @@ homepage = "https://github.com/nasyxx/smile_config"
 includes = ["smile_config"]
 version = {from = "smile_config/__init__.py"}
 
+[tool.pdm.scripts]
+pre_install = """emacs -Q --batch --find-file readme.org --eval \"(progn (require 'ox-md) (org-md-export-to-markdown))\""""
+post_install = "rm -rf readme.md && rm -f readme.md~"
+pre_build = """emacs -Q --batch --find-file readme.org --eval \"(progn (require 'ox-md) (org-md-export-to-markdown))\""""
+post_build = "rm -rf readme.md && rm -f readme.md~"
+
 [build-system]
 requires = ["pdm-pep517"]
 build-backend = "pdm.pep517.api"
 
 [tool.isort]
-py_version = 39
+py_version = "auto"
 
 profile = "black"
 group_by_package = true
@@ -39,24 +47,46 @@ import_heading_stdlib = "Standard Library"
 known_db = ["lucene", "lupyne", "elasticsearch", "sqlite", "shelve"]
 import_heading_db = "Database"
 
-known_tf = ["tensorflow"]
+known_tf = ["tensorflow", "keras"]
 import_heading_tf = "Tensorflow"
 
-known_torch = ["torch"]
+known_torch = ["torch", "torchdata", "torchvision", "pytorch_lightning"]
 import_heading_torch = "Torch"
 
-known_types = ["typing", "types", "typing_extensions"]
+known_jax = ["jax", "haiku", "flax", "optax", "jraph", "chex", "jaxopt"]
+import_heading_jax = "JAX"
+
+known_types = ["typing", "types", "jaxtyping", "numpy.typing", "typing_extensions"]
 import_heading_types = "Types"
 
-known_config = ["config", "settings", "cfg"]
+known_config = ["config", "settings", "cfg", "smile_config"]
 import_heading_config = "Config"
 
 known_math = ["numpy", "scipy", "sklearn", "pandas"]
 import_heading_math = "Math"
 
+known_plot = ["matplotlib"]
+import_heading_plot = "Plot"
+
 import_heading_thirdparty = "Others"
 
 import_heading_localfolder = "Local"
+known_localfolder = ["sites", "src"]
 
-sections = ["FUTURE", "FIRSTPARTY", "STDLIB", "DB", "MATH", "TF", "TORCH", "CONFIG", "TYPES", "THIRDPARTY", "LOCALFOLDER"]
+import_heading_utils = "Utils"
+known_utils = ["tqdm", "rich"]
 
+sections = ["FUTURE", "FIRSTPARTY", "STDLIB", "TYPES", "UTILS", "DB", "MATH", "PLOT", "TF", "TORCH", "JAX", "CONFIG", "THIRDPARTY", "LOCALFOLDER"]
+
+[tool.pyright]
+pythonVersion = "3.10"
+extraPaths = [
+    "__pypackages__/3.10/lib",
+]
+
+exclude = [
+    "**/__pycache__",
+]
+reportMissingTypeStubs = "information"
+
+useLibraryCodeForTypes = true

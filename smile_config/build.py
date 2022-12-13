@@ -39,13 +39,13 @@ from __future__ import annotations
 
 # Standard Library
 import re
-from argparse import ArgumentDefaultsHelpFormatter
+from argparse import ArgumentDefaultsHelpFormatter, BooleanOptionalAction
 from dataclasses import is_dataclass
 from pydoc import locate
 
 # Types
-from typing import Any, Generator, Optional, TypeVar, Union, get_type_hints
-from typing_extensions import _AnnotatedAlias  # noqa: WPS450
+from typing import _AnnotatedAlias  # type: ignore
+from typing import Any, Generator, TypeVar, get_type_hints
 
 # Local
 from .config import Config, Option, SConfig
@@ -57,7 +57,7 @@ A = TypeVar("A")
 B = TypeVar("B")
 
 
-def from_dataclass(config: DC, ns: Optional[dict[str, Any]] = None) -> Config:
+def from_dataclass(config: DC, ns: dict[str, Any] | None = None) -> Config:
     """Build config from dataclass."""
     if not is_dataclass(config):
         raise TypeError("config must be a dataclass.")
@@ -71,7 +71,7 @@ def from_dataclass(config: DC, ns: Optional[dict[str, Any]] = None) -> Config:
     )
 
 
-def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option:
+def _build_option(x: str, dc: DC, ns: dict[str, Any] | None = None) -> Option:
     typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
     helps = "-"
     kwds = {}
@@ -87,12 +87,29 @@ def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option
             kwds = metas
 
     styp = str(typ)
+
+    if "| None" in styp:
+        styp = styp.replace("| None", "").strip()
+        typ = locate(styp) or str
+
     if "Optional" in styp:
         styp = TRE.findall(styp)[0]
-    if styp.startswith("list") or styp.startswith("List"):
+
+    if (
+        styp.startswith("list")
+        or styp.startswith("List")
+        or styp.startswith("tuple")
+        or styp.startswith("Tuple")
+    ):
+        if styp.startswith("tuple") or styp.startswith("Tuple"):
+            Warning("Tuple is not supported.  Convert tuple to list.")
         tt = TRE.findall(styp)
         typ = tt and locate(tt[0]) or str
         kwds["nargs"] = "+"
+
+    if "bool" in styp:
+        typ = bool
+        kwds["action"] = BooleanOptionalAction
 
     kwds.setdefault("default", getattr(dc, x))
     kwds.setdefault("type", typ)
@@ -101,15 +118,15 @@ def _build_option(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> Option
     return Option(f"--{x}", *args, **kwds)
 
 
-def _build_sconfig(x: str, dc: DC, ns: Optional[dict[str, Any]] = None) -> SConfig:
+def _build_sconfig(x: str, dc: DC, ns: dict[str, Any] | None = None) -> SConfig:
     if not is_dataclass(dc):
         raise TypeError("dc must be a dataclass.")
     return SConfig(x, None, *_build_options(getattr(dc, x), ns))
 
 
 def _build_options(
-    dc: DC, ns: Optional[dict[str, Any]] = None
-) -> Generator[Union[SConfig, Option], None, None]:
+    dc: DC, ns: dict[str, Any] | None = None
+) -> Generator[SConfig | Option, None, None]:
     for x in dc.__dataclass_fields__:
         if is_dataclass(getattr(dc, x)):
             yield _build_sconfig(x, dc, ns)

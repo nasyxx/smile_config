@@ -35,6 +35,9 @@ license  : GPL-3.0+
 
 smile config utils
 """
+from __future__ import annotations
+from dataclasses import asdict
+
 # Standard Library
 import inspect
 from collections import defaultdict
@@ -42,30 +45,40 @@ from itertools import chain
 from os import PathLike
 
 # Types
-from typing import Any, Callable, Generator, Iterable, Mapping, Type, TypeVar, Union
-from typing_extensions import Protocol
+from typing import (
+    Any,
+    Callable,
+    Generator,
+    Iterable,
+    Mapping,
+    Protocol,
+    Type,
+    TypeAlias,
+    TypeVar,
+)
 
 # Others
-from tomlkit import TOMLDocument, dump, dumps, parse
+from tomlkit import TOMLDocument, dump, parse
 
 A = TypeVar("A")
 B = TypeVar("B")
 DD = defaultdict[str, Any]
+UP: TypeAlias = str | PathLike[str]
 
 
 class DC(Protocol):
     """Dataclass typing."""
 
-    __dataclass_fields__: dict
+    __dataclass_fields__: dict[str, Any]
 
 
-def load_config(path: Union[str, PathLike[str]]) -> TOMLDocument:
+def load_config(path: UP) -> TOMLDocument:
     """Load config file."""
     with open(path) as f:
         return parse(f.read())
 
 
-def save_config(config: Mapping, path: Union[str, PathLike[str]]) -> Mapping:
+def save_config(config: Mapping[str, Any], path: UP) -> Mapping[str, Any]:
     """Save config file."""
     with open(path, "w") as f:
         dump(config, f)
@@ -92,7 +105,7 @@ def _config_insert(d: DD, key: str, value: Any, nested: bool = True) -> DD:
     return d
 
 
-def config_dict(d: dict, nested: bool = True) -> DD:
+def config_dict(d: dict[str, Any], nested: bool = True) -> DD:
     """Get config dictional from config D."""
     r = _config_dict_init()
     for k, v in d.items():
@@ -134,3 +147,8 @@ def from_dict(cls: Type[A], data: dict[str, Any]) -> A:
             )
         )
     )
+
+
+def merge_dict(conf: DC, data: dict[str, Any]) -> DC:
+    """Merge data to conf."""
+    return from_dict(conf.__class__, asdict(conf) | data)

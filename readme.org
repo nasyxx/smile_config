@@ -170,8 +170,36 @@ Smile config provides four APIs:
   def from_dataclass(dc: Dataclass) -> Config:...
 
   # Convert dict to an existing dataclass
-  def from_dict(d: dict, dc: Type[Dataclass]) -> Dataclass:...
+  def from_dict(dc: Type[Dataclass], d: dict) -> Dataclass:...
 
   # Merge a dict with an existing dataclass instance
   def merge_dict(dc: Dataclass, d: dict) -> Dataclass:...
+#+end_src
+
+*** Example
+
+#+begin_src python
+  @dataclass
+  class Eg:
+      a: int = 1
+      b: bool = False
+
+  conf = from_dataclass(Eg())
+
+  print(conf)  # Config
+  # output: Eg(a=1, b=False)
+
+  print(conf.conf)  # dict
+  # output: {'a': 1, 'b': False}
+
+  print(conf.config)  # Eg
+  # output: Eg(a=1, b=False)
+
+  conf_dc = from_dict(Eg, {"a": 2, "b": True})  # Type[Eg] -> dict -> Eg
+  print(conf_dc)
+  # output: Eg(a=2, b=True)
+
+  conf_merge = merge_dict(conf_dc, {"a": 3})  # Eg -> dict -> Eg
+  print(conf_merge)
+  # output: Eg(a=3, b=True)
 #+end_src

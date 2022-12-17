@@ -42,8 +42,13 @@ Generate command line options  from dataclasses.
       x: bool = True
       a: int | None = None
 
+  config = from_dataclass(Example()).config
 
-  print(from_dataclass(Example()).config)
+  print(config)
+
+  # If autocomplete is not working, try to add the following line to your config file:
+  from typing import cast
+  config = cast(Example, config)
 #+end_src
 
 #+begin_src sh

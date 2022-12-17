@@ -53,7 +53,6 @@ from typing import (
     Mapping,
     Protocol,
     Type,
-    TypeAlias,
     TypeVar,
 )
 
@@ -63,7 +62,7 @@ from tomlkit import TOMLDocument, dump, parse
 A = TypeVar("A")
 B = TypeVar("B")
 DD = defaultdict[str, Any]
-UP: TypeAlias = str | PathLike[str]
+UP = str | PathLike[str]
 
 
 class DC(Protocol):

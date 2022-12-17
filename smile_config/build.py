@@ -45,7 +45,7 @@ from pydoc import locate
 
 # Types
 from typing import _AnnotatedAlias  # type: ignore
-from typing import Any, Generator, TypeVar, get_type_hints
+from typing import Any, Generator, TypeVar, get_type_hints, Union
 
 # Local
 from .config import Config, Option, SConfig
@@ -57,7 +57,7 @@ A = TypeVar("A")
 B = TypeVar("B")
 
 
-def from_dataclass(config: DC, ns: dict[str, Any] | None = None) -> Config:
+def from_dataclass(config: DC, ns: Union[dict[str, Any], None] = None) -> Config:
     """Build config from dataclass."""
     if not is_dataclass(config):
         raise TypeError("config must be a dataclass.")
@@ -71,7 +71,7 @@ def from_dataclass(config: DC, ns: dict[str, Any] | None = None) -> Config:
     )
 
 
-def _build_option(x: str, dc: DC, ns: dict[str, Any] | None = None) -> Option:
+def _build_option(x: str, dc: DC, ns: Union[dict[str, Any], None] = None) -> Option:
     typ = get_type_hints(dc, globalns=ns, include_extras=True)[x]
     helps = "-"
     kwds = {}
@@ -118,14 +118,14 @@ def _build_option(x: str, dc: DC, ns: dict[str, Any] | None = None) -> Option:
     return Option(f"--{x}", *args, **kwds)
 
 
-def _build_sconfig(x: str, dc: DC, ns: dict[str, Any] | None = None) -> SConfig:
+def _build_sconfig(x: str, dc: DC, ns: Union[dict[str, Any], None] = None) -> SConfig:
     if not is_dataclass(dc):
         raise TypeError("dc must be a dataclass.")
     return SConfig(x, None, *_build_options(getattr(dc, x), ns))
 
 
 def _build_options(
-    dc: DC, ns: dict[str, Any] | None = None
+    dc: DC, ns: Union[dict[str, Any], None] = None
 ) -> Generator[SConfig | Option, None, None]:
     for x in dc.__dataclass_fields__:
         if is_dataclass(getattr(dc, x)):

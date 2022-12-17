@@ -36,52 +36,27 @@ license  : GPL-3.0+
 smile config utils
 """
 from __future__ import annotations
-from dataclasses import asdict
 
 # Standard Library
 import inspect
 from collections import defaultdict
+from dataclasses import asdict
 from itertools import chain
 from os import PathLike
 
 # Types
-from typing import (
-    Any,
-    Callable,
-    Generator,
-    Iterable,
-    Mapping,
-    Protocol,
-    Type,
-    TypeVar,
-)
-
-# Others
-from tomlkit import TOMLDocument, dump, parse
+from typing import Any, Callable, Generator, Iterable, Protocol, Type, TypeVar, Union
 
 A = TypeVar("A")
 B = TypeVar("B")
 DD = defaultdict[str, Any]
-UP = str | PathLike[str]
+UP = Union[str, PathLike[str]]
 
 
 class DC(Protocol):
     """Dataclass typing."""
 
     __dataclass_fields__: dict[str, Any]
-
-
-def load_config(path: UP) -> TOMLDocument:
-    """Load config file."""
-    with open(path) as f:
-        return parse(f.read())
-
-
-def save_config(config: Mapping[str, Any], path: UP) -> Mapping[str, Any]:
-    """Save config file."""
-    with open(path, "w") as f:
-        dump(config, f)
-    return config
 
 
 def add_prefix(x: str, p: str) -> str:

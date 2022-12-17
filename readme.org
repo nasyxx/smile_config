@@ -43,7 +43,7 @@ Generate command line options  from dataclasses.
       a: int | None = None
 
 
-  print(from_dataclass(Example()))
+  print(from_dataclass(Example()).config)
 #+end_src
 
 #+begin_src sh

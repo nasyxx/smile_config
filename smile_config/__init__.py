@@ -9,4 +9,4 @@ from .api import (
     merge_dict,
 )
 
-__version__ = "0.9.11"
+__version__ = "0.9.12"

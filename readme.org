@@ -51,10 +51,14 @@ Generate command line options  from dataclasses.
   config = cast(Example, config)
 #+end_src
 
+You can access the config as namedtuple.
+
 #+begin_src sh
   > python config.py --ml.cc 10 10 --ml.lr 0.001 --no-x --a "1"
   Example(ml=ML(lr=0.001, train=Train(batch_size=64), cc=[10, 10]), x=False, a=1)
 #+end_src
+
+Also, auto generate help message with default value.
 
 #+begin_src sh
   > python config.py

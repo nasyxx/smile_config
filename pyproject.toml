@@ -25,7 +25,7 @@ excludes = ["./**/.git"]
 
 [tool.pdm.version]
 source = "file"
-path = "mypackage/smile_config/__init__.py"
+path = "smile_config/__init__.py"
 
 [tool.pdm.scripts]
 pre_install = """emacs -Q --batch --find-file readme.org --eval \"(progn (require 'ox-md) (org-md-export-to-markdown))\""""

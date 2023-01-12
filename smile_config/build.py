@@ -56,7 +56,6 @@ TRE = re.compile(r"^.*?\[(.*)\]$")
 A = TypeVar("A")
 B = TypeVar("B")
 
-
 def from_dataclass(config: DC, ns: Union[dict[str, Any], None] = None) -> Config:
     """Build config from dataclass."""
     if not is_dataclass(config):

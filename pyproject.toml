@@ -16,11 +16,16 @@ readme = "readme.md"
 
 [project.urls]
 homepage = "https://github.com/nasyxx/smile_config"
+repository = "https://github.com/nasyxx/smile_config"
 
 [tool]
-[tool.pdm]
+[tool.pdm.build]
 includes = ["smile_config"]
-version = {from = "smile_config/__init__.py"}
+excludes = ["./**/.git"]
+
+[tool.pdm.version]
+source = "file"
+path = "mypackage/smile_config/__init__.py"
 
 [tool.pdm.scripts]
 pre_install = """emacs -Q --batch --find-file readme.org --eval \"(progn (require 'ox-md) (org-md-export-to-markdown))\""""

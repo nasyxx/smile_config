@@ -136,6 +136,10 @@ If the second argument is a ~list~, e.g. ~args~, it will be passed as ~parser.ad
 
 If the second argument is a ~dict~, e.g. ~kwds~, it will be passed as ~parser.add_argument("--x", ..., **kwds)~.
 
+*** Private fields
+
+Fields that start with ~_~ will be ignored.  Thus, please initialize it by default or in `__post_init__`.
+
 *** Nested dataclass
 
 Of course! It does support nested dataclass.
@@ -154,12 +158,13 @@ Of course! It does support nested dataclass.
       a: A = A()
       b: B = B()
       c: int = 0
+      _d: str = "private _d"
 
 
   print(from_dataclass(C()).config)
 
   # Output:
-  # C(a=A(a=1), b=B(a=A(a=1)), c=0)
+  # C(a=A(a=1), b=B(a=A(a=1)), c=0, _d="private _d")
 #+end_src
 
 ** APIs

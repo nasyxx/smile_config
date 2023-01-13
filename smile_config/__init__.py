@@ -9,7 +9,7 @@ from .api import (
     merge_dict,
 )
 
-__version__ = "0.9.14"
+__version__ = "0.9.15"
 
 __all__ = [
     "Config",

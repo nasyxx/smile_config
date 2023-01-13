@@ -84,15 +84,6 @@ class ML:
 
 
 @dataclass
-class Example:
-    """Example config."""
-
-    ml: ML = ML()
-    x: bool = True
-    a: int | None = None
-
-
-@dataclass
 class A:
     a: int = 1
 
@@ -107,6 +98,17 @@ class C:
     a: A = A()
     b: B = B()
     c: int = 0
+    _d: int = 1
+
+
+@dataclass
+class Example:
+    """Example config."""
+
+    ml: ML = ML()
+    x: bool = True
+    a: int | None = None
+    c: C = C()
 
 
 if __name__ == "__main__":

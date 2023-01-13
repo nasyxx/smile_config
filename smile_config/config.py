@@ -236,6 +236,9 @@ def build_commands(
     """Build commands."""
     for arg in args:
         if isinstance(arg, Option):
+            if arg.args[0].startswith("--_"):
+                # we will treat variable start with _ as private
+                continue
             if group is None:
                 parser.add_argument(*arg.args, **arg.kwds)
             else:

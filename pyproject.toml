@@ -18,6 +18,10 @@ readme = "readme.md"
 homepage = "https://github.com/nasyxx/smile_config"
 repository = "https://github.com/nasyxx/smile_config"
 
+[project.optional-dependencies]
+rich = [
+    "rich-argparse>=1.0.0",
+]
 [tool]
 [tool.pdm.build]
 includes = ["smile_config"]

@@ -39,12 +39,12 @@ from __future__ import annotations
 
 # Standard Library
 import re
-from argparse import ArgumentDefaultsHelpFormatter, BooleanOptionalAction
+from argparse import ArgumentDefaultsHelpFormatter, BooleanOptionalAction, HelpFormatter
 from dataclasses import is_dataclass
 from pydoc import locate
 
 # Types
-from typing import _AnnotatedAlias, Type  # type: ignore
+from typing import _AnnotatedAlias  # type: ignore
 from typing import Any, Generator, TypeVar, get_type_hints, Union
 
 # Local
@@ -56,15 +56,25 @@ TRE = re.compile(r"^.*?\[(.*)\]$")
 A = TypeVar("A")
 B = TypeVar("B")
 
+try:
+    from rich_argparse import RichHelpFormatter as Formatter
+except ImportError:
+    Formatter = ArgumentDefaultsHelpFormatter  # type: ignore
 
-def from_dataclass(config: DC, *, ns: Union[dict[str, Any], None] = None) -> Config:
+
+def from_dataclass(
+    config: DC,
+    *,
+    formatter: HelpFormatter = Formatter,  # type: ignore
+    ns: Union[dict[str, Any], None] = None,
+) -> Config:
     """Build config from dataclass."""
     if not is_dataclass(config):
         raise TypeError("config must be a dataclass.")
     return Config(
         Option(
             description=config.__doc__ or type(config).__name__,
-            formatter_class=ArgumentDefaultsHelpFormatter,
+            formatter_class=formatter,
         ),
         *_build_options(config, ns),
         dcls=config.__class__,

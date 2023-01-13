@@ -110,5 +110,5 @@ class C:
 
 
 if __name__ == "__main__":
-    eg = from_dataclass(Example(), globals())
+    eg = from_dataclass(Example(), ns=globals())
     print(eg.config)

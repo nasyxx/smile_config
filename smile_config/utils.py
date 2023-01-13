@@ -45,7 +45,17 @@ from itertools import chain
 from os import PathLike
 
 # Types
-from typing import Any, Callable, Generator, Iterable, Protocol, Type, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Generator,
+    Iterable,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+)
 
 A = TypeVar("A")
 B = TypeVar("B")
@@ -54,9 +64,9 @@ UP = Union[str, PathLike[str]]
 
 
 class DC(Protocol):
-    """Dataclass typing."""
+    """Dataclass typing protocol."""
 
-    __dataclass_fields__: dict[str, Any]
+    __dataclass_fields__: ClassVar[dict[str, Any]]
 
 
 def add_prefix(x: str, p: str) -> str:

@@ -172,7 +172,8 @@ class Config:
         if dcls is not None:
             self.config = from_dict(dcls, self.conf)
         else:
-            self.config = ConfigDict(self.conf)
+            self.config = ConfigDict(self.conf)  # type: ignore
+            raise NotImplementedError("Currently not support config.")
         self.__dict__.update(self.conf)
 
     def build(self) -> ArgumentParser:

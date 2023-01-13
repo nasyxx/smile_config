@@ -44,7 +44,7 @@ from dataclasses import is_dataclass
 from pydoc import locate
 
 # Types
-from typing import _AnnotatedAlias  # type: ignore
+from typing import _AnnotatedAlias, Type  # type: ignore
 from typing import Any, Generator, TypeVar, get_type_hints, Union
 
 # Local
@@ -56,7 +56,8 @@ TRE = re.compile(r"^.*?\[(.*)\]$")
 A = TypeVar("A")
 B = TypeVar("B")
 
-def from_dataclass(config: DC, ns: Union[dict[str, Any], None] = None) -> Config:
+
+def from_dataclass(config: DC, *, ns: Union[dict[str, Any], None] = None) -> Config:
     """Build config from dataclass."""
     if not is_dataclass(config):
         raise TypeError("config must be a dataclass.")

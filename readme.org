@@ -175,8 +175,10 @@ Smile config provides four APIs:
       # the dataclass
       self.config
 
-  # Generate command line options from dataclass
-  def from_dataclass(dc: Dataclass) -> Config:...
+  # Generate command line options from dataclass.
+  # For formatter: `from rich_argparse import RichHelpFormatter`
+  # `ns`: namespaces for types.
+  def from_dataclass(dc: Dataclass, *, formatter: HelpFormatter = RichHelpFormatter, ns: dict | None = None) -> Config:...
 
   # Convert dict to an existing dataclass
   def from_dict(dc: Type[Dataclass], d: dict) -> Dataclass:...

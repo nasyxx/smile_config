@@ -61,23 +61,23 @@ You can access the config as namedtuple.
 Also, auto generate help message with default value.
 
 #+begin_src sh
-  > python config.py
-  usage: collections.py [-h] [--ml.lr ML.LR] [--ml.train.batch_size ML.TRAIN.BATCH_SIZE] [--ml.cc ML.CC [ML.CC ...]] [--x | --no-x] [--a A]
+  > python config.py --help
+  Usage: config.py [-h] [--ml.lr float] [--ml.train.batch_size int] [--ml.cc int [int ...]] [--x | --no-x] [--a int]
 
   Example config.
 
-  options:
+  Options:
     -h, --help            show this help message and exit
     --x, --no-x           - (default: True)
-    --a A                 - (default: None)
+    --a int               - (default: None)
 
-  ml:
-    --ml.lr ML.LR         learning rate (default: 0.001)
-    --ml.cc ML.CC [ML.CC ...]
+  Ml:
+    --ml.lr float         learning rate (default: 0.001)
+    --ml.cc int [int ...]
                           - (default: [10])
 
-  ml.train:
-    --ml.train.batch_size ML.TRAIN.BATCH_SIZE
+  Ml.Train:
+    --ml.train.batch_size int
                           - (default: 64)
 #+end_src
 

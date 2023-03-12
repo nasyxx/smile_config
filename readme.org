@@ -13,6 +13,8 @@
 #+creator: Emacs 30.0.50 (Org mode 9.6)
 #+cite_export:
 
+*Since there is an alternative tyro https://github.com/brentyi/tyro.git, I will not maintain this project anymore.*
+
 Generate command line options  from dataclasses.
 
 #+begin_src python
